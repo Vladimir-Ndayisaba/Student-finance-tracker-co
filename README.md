@@ -13,3 +13,7 @@ Visit `/tests.html` on the local server; all assertions should show PASS. Also m
 ## Demo video
 **Unlisted video:** https://www.loom.com/share/1a588af685804cf3b7f12a374c6c0645
 
+## Issues faced with codevibe
+-Manual word counter not capturing the true values
+-Change in ai counter affected by getting out of and opening vscode, in my case yesterday when i closed vscode my counter was at 14% and rose to 67% in the morning hen i opened it 
+-Ai counter increasing at the slightest, in my case whenever I used the vscode quick fix the counter increased and by the end I used loom to record my video and got the link when pasting it into my read me it affected my ai score
