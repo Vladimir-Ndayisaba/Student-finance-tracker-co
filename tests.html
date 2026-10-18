@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker Tests</title>
+</head>
+
+<body>
+
+    <h1>Validation and Search Tests</h1>
+
+    <pre id="results"></pre>
+
+    <script type="module">
+
+        import {
+            patterns,
+            validDate,
+            normalizeDescription
+        } from './scripts/validators.js';
+
+        import {
+            compileRegex,
+            sortRecords,
+            matchesRecord
+        } from './scripts/search.js';
+
+        import {
+            validateDataset
+        } from './scripts/storage.js';
+
+        const out = [];
+        let passed = 0;
+
+        function test(name, condition) {
+            out.push(
+                (condition ? 'PASS' : 'FAIL') + ' — ' + name
+            );
+
+            if (condition) {
+                passed++;
+            }
+        }
+
+        test(
+            'description rejects surrounding spaces',
+            !patterns.description.test(' bad ')
+        );
+
+        test(
+            'amount accepts 12.50',
+            patterns.amount.test('12.50')
+        );
+
+        test(
+            'amount rejects 12.345',
+            !patterns.amount.test('12.345')
+        );
+
+        test(
+            'category accepts hyphens',
+            patterns.category.test('School-Fees')
+        );
+
+        test(
+            'date rejects invalid calendar day',
+            !validDate('2026-02-30')
+        );
+
+        test(
+            'date accepts leap day',
+            validDate('2024-02-29')
+        );
+
+        test(
+            'advanced regex finds duplicate word',
+            patterns.duplicate.test('coffee coffee')
+        );
+
+        test(
+            'double spaces collapse',
+            normalizeDescription('Coffee  and  tea') ===
+            'Coffee and tea'
+        );
+
+        test(
+            'invalid regex throws',
+            (() => {
+                try {
+                    compileRegex('(');
+                    return false;
+                } catch {
+                    return true;
+                }
+            })()
+        );
+
+        test(
+            'case-insensitive search works',
+            matchesRecord(
+                {
+                    description: 'Coffee',
+                    category: 'Food',
+                    date: '2026-01-01',
+                    amount: 2
+                },
+                compileRegex('coffee')
+            )
+        );
+
+        test(
+            'numeric sorting works',
+            sortRecords(
+                [
+                    { amount: 3 },
+                    { amount: 1 }
+                ],
+                'amount-asc'
+            )[0].amount === 1
+        );
+
+        test(
+            'dataset rejects duplicate IDs',
+            (() => {
+                const r = {
+                    id: 'txn_1',
+                    description: 'Lunch',
+                    amount: 2,
+                    category: 'Food',
+                    date: '2026-01-01',
+                    createdAt: '2026-01-01T00:00:00Z',
+                    updatedAt: '2026-01-01T00:00:00Z'
+                };
+
+                try {
+                    validateDataset([r, r]);
+                    return false;
+                } catch {
+                    return true;
+                }
+            })()
+        );
+
+        document.getElementById('results').textContent =
+            out.join('\n') +
+            '\n\n' +
+            passed + '/' + out.length + ' passed';
+
+    </script>
+
+</body>
+</html>
